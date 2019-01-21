@@ -3283,7 +3283,7 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   }
   
   /**
-   * public with reusable message array
+   * publish method with reusable message array
    * @param channel
    * @param message
    * @param message_len
