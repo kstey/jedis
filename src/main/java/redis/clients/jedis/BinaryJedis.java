@@ -896,6 +896,22 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
     client.hset(key, field, value);
     return client.getIntegerReply();
   }
+  
+  /**
+   * Make reuse value array possible
+   * 
+   * @param key
+   * @param field
+   * @param value
+   * @param value_len
+   * @return
+   */
+  public Long hset(final byte[] key, final byte[] field, final byte[] value, int value_len) 
+  {
+	    checkIsInMultiOrPipeline();
+	    client.hset(key, field, value, value_len);
+	    return client.getIntegerReply();
+  }
 
   @Override
   public Long hset(final byte[] key, final Map<byte[], byte[]> hash) {
@@ -1128,6 +1144,13 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   public Long rpush(final byte[] key, final byte[]... strings) {
     checkIsInMultiOrPipeline();
     client.rpush(key, strings);
+    return client.getIntegerReply();
+  }
+  
+  public Long rpush(final byte[] key, final byte[] string, final int string_len) 
+  {
+    checkIsInMultiOrPipeline();
+    client.rpush(key, string, string_len);
     return client.getIntegerReply();
   }
 
@@ -1861,7 +1884,17 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   public void connect() {
     client.connect();
   }
-
+  
+  public String getHost()
+  {
+	  return client.getHost();
+  }
+  
+  public int getPort()
+  {
+	  return client.getPort();
+  }
+  
   public void disconnect() {
     client.disconnect();
   }
@@ -3247,6 +3280,20 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
     checkIsInMultiOrPipeline();
     client.publish(channel, message);
     return client.getIntegerReply();
+  }
+  
+  /**
+   * public with reusable message array
+   * @param channel
+   * @param message
+   * @param message_len
+   * @return
+   */
+  public Long publish(final byte[] channel, final byte[] message, final int message_len) 
+  {
+	    checkIsInMultiOrPipeline();
+	    client.publish(channel, message, message_len);
+	    return client.getIntegerReply();
   }
 
   @Override
