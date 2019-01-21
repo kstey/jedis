@@ -120,6 +120,79 @@ public class Connection implements Closeable {
     sendCommand(cmd, EMPTY_ARGS);
   }
 
+  /**
+   * Created specifically to allow reuse of arg buffer, instead of keeping instantiating byte array   
+   * 
+   * @param cmd
+   * @param arg_1
+   * @param arg_2
+   * @param arg_3_buf
+   * @param arg_3_buf_len
+   */
+  public void sendCommand3(final ProtocolCommand cmd, final byte[] arg_1, final byte[] arg_2, final byte[] arg_3_buf, final int arg_3_buf_len ) 
+  {
+    try {
+      connect();
+      Protocol.sendCommand3(outputStream, cmd, arg_1, arg_2, arg_3_buf, arg_3_buf_len);
+    } catch (JedisConnectionException ex) {
+      /*
+       * When client send request which formed by invalid protocol, Redis send back error message
+       * before close connection. We try to read it to provide reason of failure.
+       */
+      try {
+        String errorMessage = Protocol.readErrorLineIfPossible(inputStream);
+        if (errorMessage != null && errorMessage.length() > 0) {
+          ex = new JedisConnectionException(errorMessage, ex.getCause());
+        }
+      } catch (Exception e) {
+        /*
+         * Catch any IOException or JedisConnectionException occurred from InputStream#read and just
+         * ignore. This approach is safe because reading error message is optional and connection
+         * will eventually be closed.
+         */
+      }
+      // Any other exceptions related to connection?
+      broken = true;
+      throw ex;
+    }
+  }
+  
+  /**
+   * Copying from {@link #sendCommand(ProtocolCommand, byte[]...)} but to only allow passing 1 value array and its data length.. this is to allow reusing of the value array in user code.
+   * 
+   * @param cmd
+   * @param arg_1
+   * @param arg_2_buf
+   * @param arg_2_buf_len
+   */
+  public void sendCommand(final ProtocolCommand cmd, final byte[] arg_1, final byte[] arg_2_buf, final int arg_2_buf_len ) 
+  {
+    try {
+      connect();
+      Protocol.sendCommand(outputStream, cmd, arg_1, arg_2_buf, arg_2_buf_len);
+    } catch (JedisConnectionException ex) {
+      /*
+       * When client send request which formed by invalid protocol, Redis send back error message
+       * before close connection. We try to read it to provide reason of failure.
+       */
+      try {
+        String errorMessage = Protocol.readErrorLineIfPossible(inputStream);
+        if (errorMessage != null && errorMessage.length() > 0) {
+          ex = new JedisConnectionException(errorMessage, ex.getCause());
+        }
+      } catch (Exception e) {
+        /*
+         * Catch any IOException or JedisConnectionException occurred from InputStream#read and just
+         * ignore. This approach is safe because reading error message is optional and connection
+         * will eventually be closed.
+         */
+      }
+      // Any other exceptions related to connection?
+      broken = true;
+      throw ex;
+    }
+  }
+  
   public void sendCommand(final ProtocolCommand cmd, final byte[]... args) {
     try {
       connect();

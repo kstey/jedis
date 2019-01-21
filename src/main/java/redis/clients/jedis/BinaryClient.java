@@ -257,6 +257,18 @@ public class BinaryClient extends Connection {
   public void substr(final byte[] key, final int start, final int end) {
     sendCommand(SUBSTR, key, toByteArray(start), toByteArray(end));
   }
+  
+  /**
+   * Implement {{@link #hset(byte[], byte[], byte[])}, however allow array length be specified by user.. This is useful in the case byte array is to be reused for varying data
+   * @param key
+   * @param field
+   * @param value
+   * @param value_len
+   */
+  public void hset(final byte[] key, final byte[] field, final byte[] value, int value_len) 
+  {
+	  sendCommand3(HSET, key, field, value, value_len);
+  }
 
   public void hset(final byte[] key, final byte[] field, final byte[] value) {
     sendCommand(HSET, key, field, value);
@@ -323,6 +335,11 @@ public class BinaryClient extends Connection {
 
   public void hgetAll(final byte[] key) {
     sendCommand(HGETALL, key);
+  }
+  
+  public void rpush(final byte[] key, final byte[] string, final int string_len) 
+  {
+	  sendCommand(RPUSH, key, string, string_len);
   }
 
   public void rpush(final byte[] key, final byte[]... strings) {
@@ -587,6 +604,17 @@ public class BinaryClient extends Connection {
 
   public void subscribe(final byte[]... channels) {
     sendCommand(SUBSCRIBE, channels);
+  }
+  
+  /**
+   * Implement {@link #publish(byte[], byte[])}, but allow user to provide the message length. 
+   * @param channel
+   * @param message
+   * @param message_len
+   */
+  public void publish(final byte[] channel, final byte[] message, final int message_len) 
+  {
+	sendCommand(PUBLISH, channel, message, message_len);
   }
 
   public void publish(final byte[] channel, final byte[] message) {

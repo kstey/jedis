@@ -82,6 +82,101 @@ public final class Protocol {
   private Protocol() {
     // this prevent the class from instantiation
   }
+  
+  /**
+   * Method created to allow reuse of byte array buffer in user code
+   * @param os
+   * @param command
+   * @param buffer1
+   * @param buffer2
+   * @param buffer3
+   * @param buffer3_length
+   */
+  private static void _sendCommand3(final RedisOutputStream os, final byte[] command,
+		  final byte[] buffer1, final byte[] buffer2, final byte[] buffer3, int buffer3_length) 
+	  {
+	    try {
+	      os.write(ASTERISK_BYTE);
+	      os.writeIntCrLf(4); //4 byte array sent
+	      os.write(DOLLAR_BYTE);
+	      os.writeIntCrLf(command.length);
+	      os.write(command);
+	      os.writeCrLf();
+
+//	      for (final byte[] arg : args)
+	      {
+		        os.write(DOLLAR_BYTE);
+		        os.writeIntCrLf(buffer1.length);
+		        os.write(buffer1);
+		        os.writeCrLf();
+		        
+		        os.write(DOLLAR_BYTE);
+		        os.writeIntCrLf(buffer2.length);
+		        os.write(buffer2);
+		        os.writeCrLf();
+		  }
+	      
+	      //last buffer
+	      {
+	        os.write(DOLLAR_BYTE);
+	        os.writeIntCrLf(buffer3_length);
+	        os.write(buffer3, 0, buffer3_length);
+	        os.writeCrLf();
+	      }
+	    } catch (IOException e) {
+	      throw new JedisConnectionException(e);
+	    }
+	  }
+  
+  /**
+   * Method created to allow reuse of byte array buffer in user code
+   * @param os
+   * @param command
+   * @param buffer1
+   * @param buffer2
+   * @param buffer2_length
+   */
+  private static void _sendCommand(final RedisOutputStream os, final byte[] command,
+		  final byte[] buffer1, final byte[] buffer2, int buffer2_length) 
+	  {
+	    try {
+	      os.write(ASTERISK_BYTE);
+	      os.writeIntCrLf(3); //3 byte array sent
+	      os.write(DOLLAR_BYTE);
+	      os.writeIntCrLf(command.length);
+	      os.write(command);
+	      os.writeCrLf();
+
+//	      for (final byte[] arg : args)
+	      {
+		        os.write(DOLLAR_BYTE);
+		        os.writeIntCrLf(buffer1.length);
+		        os.write(buffer1);
+		        os.writeCrLf();
+		  }
+	      
+	      {
+	        os.write(DOLLAR_BYTE);
+	        os.writeIntCrLf(buffer2_length);
+	        os.write(buffer2, 0, buffer2_length);
+	        os.writeCrLf();
+	      }
+	    } catch (IOException e) {
+	      throw new JedisConnectionException(e);
+	    }
+	  }
+  
+  public static void sendCommand(final RedisOutputStream os, final ProtocolCommand command,
+		  final byte[] arg_1_buf, final byte[] arg_2_buf, final int arg_2_buf_len) 
+  {
+	    _sendCommand(os, command.getRaw(), arg_1_buf, arg_2_buf, arg_2_buf_len );
+  }
+  
+  public static void sendCommand3(final RedisOutputStream os, final ProtocolCommand command,
+		  final byte[] arg_1_buf, final byte[] arg_2_buf, final byte[] arg_3_buf, final int arg_3_buf_len) 
+  {
+	    _sendCommand3(os, command.getRaw(), arg_1_buf, arg_2_buf, arg_3_buf, arg_3_buf_len );
+  }
 
   public static void sendCommand(final RedisOutputStream os, final ProtocolCommand command,
       final byte[]... args) {
